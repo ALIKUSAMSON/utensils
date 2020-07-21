@@ -1,0 +1,187 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+  <main id="main">
+
+    <!-- ======= Breadcrumbs ======= -->
+    <div class="breadcrumbs" data-aos="fade-in">
+      <div class="container">
+        <h2>Checkout form</h2>
+        <p>Shipping details </p>
+      </div>
+    </div><!-- End Breadcrumbs -->
+
+    <!-- ======= Contact Section ======= -->
+    <section id="contact" class="contact">
+
+      <div class="container" data-aos="fade-up">
+
+        <div class="row mt-5">
+
+          <div class="col-lg-6 mt-5 mt-lg-0">
+
+            <form id="form" method="post" role="form">
+              {% csrf_token %}
+              <div class="form-row" id="user-info">
+                <div class="col-md-6 form-group">
+                  <input type="text" name="name" class="form-control" id="name" placeholder="Your Name" data-rule="minlen:4" data-msg="Please enter at least 4 chars" />
+                  <div class="validate"></div>
+                </div>
+                <div class="col-md-6 form-group">
+                  <input type="email" class="form-control" name="email" id="email" placeholder="Your Email" data-rule="email" data-msg="Please enter a valid email" />
+                  <div class="validate"></div>
+                </div>
+              </div>
+              <div id="shipping-info">
+              <div class="form-row">
+                <div class="col-md-6 form-group">
+                  <input type="text" name="district" class="form-control" id="district" placeholder="District" data-rule="minlen:4" data-msg="Please enter at least 4 chars" />
+                  <div class="validate"></div>
+                </div>
+                <div class="col-md-6 form-group">
+                  <input type="text" class="form-control" name="city" id="city" placeholder="City" data-msg="Please enter a valid email" />
+                  <div class="validate"></div>
+                </div>
+              </div>
+              <div class="form-group">
+                <input type="text" class="form-control" name="phonenumber" id="phonenumber" placeholder="Phone number" data-rule="minlen:4" data-msg="Please enter at least 8 chars of subject" />
+                <div class="validate"></div>
+              </div>
+              <div class="form-group">
+                <textarea class="form-control" name="address" rows="5" data-rule="required" data-msg="Please write something for us" placeholder="Address details"></textarea>
+                <div class="validate"></div>
+              </div>
+              
+              <div class="mb-3">
+                <div class="error-message"></div>
+              </div>
+              </div>
+               <input type="submit" name="" id="form-button" value="continue" class="btn btn-success btn-block text-center">
+             
+            </form>
+            <br>
+            <div class="box-element hidden" id="payment-info">
+            <small>Paypal Options</small>
+            <button id="make-payment">Make Payment</button>
+          </div>
+
+          </div>
+
+          <div class="col-lg-6">
+            <div class="box-element">
+              <div class="text-center"><a href="{% url 'cart' %}"><button>&#x2190;Back to cart</button></a></div>
+              <hr>
+              <h3>Order Summary</h3>
+              <hr>
+                    <table class='table'>
+                {% for item in items %}
+                  <tr>
+                    <td><img src="{{ item.product.imageURL }}" width="50px" height="30px"></td>
+                    <td>{{ item.product.name }}</td>
+                    <td>UGX {{ item.product.price|floatformat:0 }}</td>
+                    <td>{{ item.quantity }}</td>
+                </tr>
+                {% endfor %}
+                </table> 
+            </div>
+            <hr>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <h4>Item:</h4>
+                  <p class="price">{{ order.get_cart_items }}</p>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <h4>Total:</h4>
+                  <p class="price">UGX {{ order.get_cart_total|floatformat:0 }} </p>
+                </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+    </section><!-- End Contact Section -->
+
+  </main><!-- End #main -->
+<script type="text/javascript">
+  var shipping = '{{ order.shipping }}'
+  var total = '{{ order.get_cart_total }}'
+
+
+  if(shipping == 'False'){
+    document.getElementById('shipping-info').innerHTML=''
+  }
+  if(user!='AnonymousUser'){
+    document.getElementById('user-info').innerHTML=''
+  }
+  if(shipping == 'False' && user != 'AnonymousUser'){
+    //Hide entire form if user is logged in and shipping is false
+    document.getElementById('form-button').classList.add('hidden')
+    //Show payment if logged in user wants to buy an item that does not require shipping.
+    document.getElementById('payment-info').classList.remove('hidden')
+  }
+
+  var form = document.getElementById('form')
+  csrftoken = form.getElementsByTagName('input')[0].value
+  console.log('Newtoken:',form.getElementsByTagName('input')[0].value)
+
+
+  form.addEventListener('submit',function(e){
+    e.preventDefault()
+    console.log('Form submitted...')
+    document.getElementById('form-button').classList.add('hidden')
+    document.getElementById('payment-info').classList.remove('hidden')
+
+  })
+  document.getElementById('make-payment').addEventListener('click',function(e){
+    submitFormData()
+  })
+function submitFormData(){
+  console.log('payment button clicked')
+
+  var userFormData = {
+    'name':null,
+    'email':null,
+    'total':total,
+  }
+    var shippingInfo = {
+    'city':null,
+    'district':null,
+    'phonenumber':null,
+    'address':null,
+  }
+  if(shipping != 'False'){
+    shippingInfo.address = form.address.value
+    shippingInfo.city = form.city.value
+    shippingInfo.phonenumber = form.phonenumber.value
+    shippingInfo.district = form.district.value
+  }
+    if(user == 'AnonymousUser'){
+    userFormData.name = form.name.value
+    userFormData.email = form.email.value
+  }
+
+  var url = '/process_order/'
+  fetch(url,{
+    method:'POST',
+    headers:{
+      'context-Type':'application/json',
+      'X-CSRFToken':csrftoken,
+    },
+    body:JSON.stringify({'form':userFormData,'shipping':shippingInfo}) 
+  })
+  .then((response)=>response.json())
+  .then((data)=>{
+    console.log('success:',data);
+    alert('Transcation completed');
+    window.location.href="{% url 'index' %}"
+  })
+
+}
+
+</script>
+
+
+{% endblock %}
