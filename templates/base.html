@@ -1,8 +1,6 @@
-<!DOCTYPE html>
+
 {% load static %}
-
 <html lang="en">
-
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
@@ -10,10 +8,6 @@
   <title>Utensils</title>
   <meta content="" name="descriptions">
   <meta content="" name="keywords">
-
-  <!-- Favicons -->
-  <!--<link href="{% static 'img/favicon.png' %}" rel="icon">
-  <link href="{% static 'img/apple-touch-icon.png' %}" rel="apple-touch-icon">-->
 
   <!-- Vendor CSS Files -->
   <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
@@ -31,6 +25,7 @@
 
   <script type="text/javascript">
     var user = '{{ request.user }}'
+
     function getCookie(name){
       var cookieValue = null;
       if(document.cookie && document.cookie!==''){
@@ -46,6 +41,26 @@
       return cookieValue;
     }
     var csrftoken = getCookie('csrftoken');
+
+    function getCookie(name){
+      var cookieArr = document.cookie.split(";");
+      for(var i=0;i<cookieArr.length[i];i++){
+        var cookiePair = cookieArr[i].split("=");
+
+        if(name == cookiePair[0].trim()){
+          return decodeURIComponent(cookiePair[1]);
+        }
+      }
+      return null;
+    }
+      var cart = JSON.parse(getCookie('cart'))
+      if(cart == undefined){
+        cart = {}
+        console.log("Cart was created")
+        document.cookie = "cart=" + JSON.stringify(cart)
+      }
+      console.log("cart:", cart)
+
   </script>
 </head>
 
@@ -59,10 +74,6 @@
         <ul>
           <li class="active"><a href="{% url 'index' %}">Home</a></li>
           <li><a href="about.html">About</a></li>
-          <li><a href="{% url 'courses' %}">Courses</a></li>
-          <li><a href="{% url 'trainers' %}">Trainers</a></li>
-          <li><a href="{% url 'events' %}">Events</a></li>
-          <li><a href="{% url 'pricing' %}">Pricing</a></li>
           <li class="drop-down"><a href="">Drop Down</a>
             <ul>
               <li><a href="#">Drop Down 1</a></li>

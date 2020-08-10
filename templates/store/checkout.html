@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+  {% extends 'base.html' %}
 {% load static %}
 
 {% block content %}
@@ -164,6 +164,7 @@ function submitFormData(){
   }
 
   var url = '/process_order/'
+  
   fetch(url,{
     method:'POST',
     headers:{
@@ -176,6 +177,9 @@ function submitFormData(){
   .then((data)=>{
     console.log('success:',data);
     alert('Transcation completed');
+
+    cart = {}
+    document.cookie = 'cart=' + JSON.stringify(cart) + ";domain=;path=/"
     window.location.href="{% url 'index' %}"
   })
 
